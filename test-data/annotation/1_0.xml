@@ -1,0 +1,26 @@
+<annotation>
+	<folder>Cannula</folder>
+	<filename>1_0.jpg</filename>
+	<path>F:\公司资料\文档\AI竞赛\Surgical Instrument\外科工具\重命名\Cannula\1_0.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>500</width>
+		<height>500</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Cannula</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>12</xmin>
+			<ymin>143</ymin>
+			<xmax>488</xmax>
+			<ymax>336</ymax>
+		</bndbox>
+	</object>
+</annotation>
