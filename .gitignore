@@ -130,7 +130,10 @@ dmypy.json
 
 # 输入数据
 /images/*
+!/images/.gitkeep
 /annotation/*
+!/annotation/.gitkeep
 
 # 输出文件夹
 /output/*
+!/output/.gitkeep
