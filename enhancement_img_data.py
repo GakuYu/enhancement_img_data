@@ -60,9 +60,12 @@ class ImageUtils:
                 bx, by = [bx0, bx1, bx2, bx3], [by0, by1, by2, by3]
                 bx.sort()
                 by.sort()
-                dst_boxes.append([int(bx[0]+nw_half), int(nh_half-by[0]), int(bx[3]+nw_half), int(nh_half-by[3])])
+                dst_boxes.append([int(bx[0]+nw_half), int(nh_half-by[3]), int(bx[3]+nw_half), int(nh_half-by[0])])
             else:
-                dst_boxes.append([int(bx0+nw_half), int(nh_half-by0), int(bx2+nw_half), int(nh_half-by2)])
+                bx, by = [bx0, bx2], [by0, by2]
+                bx.sort()
+                by.sort()
+                dst_boxes.append([int(bx[0]+nw_half), int(nh_half-by[1]), int(bx[1]+nw_half), int(nh_half-by[0])])
         return dst, dst_boxes
 
     @staticmethod
@@ -110,9 +113,9 @@ class Enhancement:
 
     def __init__(self):
         self.img_dir = "images/"
-        self.anno_dir = "annotation/"
+        self.anno_dir = "annotations/"
         self.output_img_dir = "output/images/"
-        self.output_anno_dir = "output/annotation/"
+        self.output_anno_dir = "output/annotations/"
         pass
 
     def save_file(self, img, boxes, anno_tree, img_name, anno_name, label_name):
@@ -202,7 +205,7 @@ class Enhancement:
         
 
 def test_image():
-    anno_dir = "output/annotation/"
+    anno_dir = "output/annotations/"
     # for anno_file in os.listdir(anno_dir):
     for _i in range(8):
         anno_file = "%s_%s.xml" % ("1_0", _i)
@@ -221,6 +224,7 @@ def test_image():
                 ]
             )
         for box in box:
+            log.info(box)
             cv.rectangle(img, (box[0], box[1]), (box[2], box[3]), (0,255,0), 4)
         cv.imshow("img", img)
         cv.waitKey()
@@ -228,6 +232,6 @@ def test_image():
 
 
 if __name__ == "__main__":
-    enhancement = Enhancement()
-    enhancement.run()
-    # test_image()
+    #enhancement = Enhancement()
+    #enhancement.run()
+    test_image()
