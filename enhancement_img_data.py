@@ -60,12 +60,12 @@ class ImageUtils:
                 bx, by = [bx0, bx1, bx2, bx3], [by0, by1, by2, by3]
                 bx.sort()
                 by.sort()
-                dst_boxes.append([int(bx[0]+nw_half), int(nh_half-by[3]), int(bx[3]+nw_half), int(nh_half-by[0])])
+                dst_boxes.append([int(bx[0]+nw_half), int(nh_half-by[3]), int(bx[3]+nw_half), int(nh_half-by[0]), box[4]])
             else:
                 bx, by = [bx0, bx2], [by0, by2]
                 bx.sort()
                 by.sort()
-                dst_boxes.append([int(bx[0]+nw_half), int(nh_half-by[1]), int(bx[1]+nw_half), int(nh_half-by[0])])
+                dst_boxes.append([int(bx[0]+nw_half), int(nh_half-by[1]), int(bx[1]+nw_half), int(nh_half-by[0]), box[4]])
         return dst, dst_boxes
 
     @staticmethod
@@ -92,13 +92,13 @@ class ImageUtils:
         dst_boxes = list()
         if flip_type == 1:
             for box in boxes:
-                dst_boxes.append([iw-box[2], box[1], iw-box[0], box[3]])
+                dst_boxes.append([iw-box[2], box[1], iw-box[0], box[3], box[4]])
         elif flip_type == 0:
             for box in boxes:
-                dst_boxes.append([box[0], ih-box[3], box[2], ih-box[1]])
+                dst_boxes.append([box[0], ih-box[3], box[2], ih-box[1], box[4]])
         else:
             for box in boxes:
-                dst_boxes.append([iw-box[2], ih-box[3], iw-box[0], ih-box[1]])
+                dst_boxes.append([iw-box[2], ih-box[3], iw-box[0], ih-box[1], box[4]])
         return dst, dst_boxes
 
 
@@ -118,7 +118,7 @@ class Enhancement:
         self.output_anno_dir = "output/annotations/"
         pass
 
-    def save_file(self, img, boxes, anno_tree, img_name, anno_name, label_name):
+    def save_file(self, img, boxes, anno_tree, img_name, anno_name):
         ih, iw = img.shape[:2]
         img_folder = anno_tree.findtext("folder")
         img_dir = os.path.join(self.output_img_dir, img_folder)
@@ -132,7 +132,7 @@ class Enhancement:
         anno_size.find("height").text = str(ih)
 
         for i, obj in enumerate(anno_tree.findall("object")):
-            obj.find("name").text = label_name
+            obj.find("name").text = boxes[i][4]
             box_node = obj.find("bndbox")
             box_node.find("xmin").text = str(boxes[i][0])
             box_node.find("ymin").text = str(boxes[i][1])
@@ -163,7 +163,8 @@ class Enhancement:
                 img_folder = anno_tree.findtext("folder")
                 img_fullname = anno_tree.findtext("filename")
                 img_name, img_ext =  img_fullname.split(".")
-                img_path = os.path.join(self.img_dir, img_folder, img_fullname)
+                # img_path = os.path.join(self.img_dir, img_folder, img_fullname)
+                img_path = os.path.join(self.img_dir, img_fullname)
                 
                 src_img = cv.imdecode(np.fromfile(img_path,dtype=np.uint8),-1)
                 src_box = list()
@@ -175,43 +176,44 @@ class Enhancement:
                             int(box_node.findtext("ymin")),
                             int(box_node.findtext("xmax")),
                             int(box_node.findtext("ymax")),
+                            obj.findtext("name")
                         ]
                     )
                 self.save_file(src_img, src_box, anno_tree, 
-                        "%s_0.%s" % (img_name, img_ext), "%s_0.%s" % (anno_name, anno_ext), label)
+                        "%s_0.%s" % (img_name, img_ext), "%s_0.%s" % (anno_name, anno_ext))
                 dst_img, dst_box = ImageUtils.rotation(src_img, 90, src_box)
                 self.save_file(dst_img, dst_box, anno_tree, 
-                        "%s_1.%s" % (img_name, img_ext), "%s_1.%s" % (anno_name, anno_ext), label)
+                        "%s_1.%s" % (img_name, img_ext), "%s_1.%s" % (anno_name, anno_ext))
                 dst_img, dst_box = ImageUtils.rotation(src_img, 180, src_box)
                 self.save_file(dst_img, dst_box, anno_tree, 
-                        "%s_2.%s" % (img_name, img_ext), "%s_2.%s" % (anno_name, anno_ext), label)
+                        "%s_2.%s" % (img_name, img_ext), "%s_2.%s" % (anno_name, anno_ext))
                 dst_img, dst_box = ImageUtils.rotation(src_img, 270, src_box)
                 self.save_file(dst_img, dst_box, anno_tree, 
-                        "%s_3.%s" % (img_name, img_ext), "%s_3.%s" % (anno_name, anno_ext), label)
+                        "%s_3.%s" % (img_name, img_ext), "%s_3.%s" % (anno_name, anno_ext))
                 flip_img, flip_box = ImageUtils.flip(src_img, 1, src_box)
                 self.save_file(flip_img, flip_box, anno_tree, 
-                        "%s_4.%s" % (img_name, img_ext), "%s_4.%s" % (anno_name, anno_ext), label)
+                        "%s_4.%s" % (img_name, img_ext), "%s_4.%s" % (anno_name, anno_ext))
                 dst_img, dst_box = ImageUtils.rotation(flip_img, 90, flip_box)
                 self.save_file(dst_img, dst_box, anno_tree, 
-                        "%s_5.%s" % (img_name, img_ext), "%s_5.%s" % (anno_name, anno_ext), label)
+                        "%s_5.%s" % (img_name, img_ext), "%s_5.%s" % (anno_name, anno_ext))
                 dst_img, dst_box = ImageUtils.rotation(flip_img, 180, flip_box)
                 self.save_file(dst_img, dst_box, anno_tree, 
-                        "%s_6.%s" % (img_name, img_ext), "%s_6.%s" % (anno_name, anno_ext), label)
+                        "%s_6.%s" % (img_name, img_ext), "%s_6.%s" % (anno_name, anno_ext))
                 dst_img, dst_box = ImageUtils.rotation(flip_img, 270, flip_box)
                 self.save_file(dst_img, dst_box, anno_tree, 
-                        "%s_7.%s" % (img_name, img_ext), "%s_7.%s" % (anno_name, anno_ext), label)
+                        "%s_7.%s" % (img_name, img_ext), "%s_7.%s" % (anno_name, anno_ext))
             except Exception as e:
                 log.error(e)
         
 
 def test_image():
     anno_dir = "output/annotations/"
-    # for anno_file in os.listdir(anno_dir):
-    for _i in range(8):
-        anno_file = "%s_%s.xml" % ("1_0", _i)
+    
+    for anno_file in os.listdir(anno_dir):
+        
         anno_tree = ElementTree()
         anno_tree.parse(os.path.join(anno_dir, anno_file))
-        img = cv.imdecode(np.fromfile(os.path.join("output", "images", anno_tree.findtext("path")),dtype=np.uint8),-1)
+        img = cv.imdecode(np.fromfile(os.path.join("output", anno_tree.findtext("path")),dtype=np.uint8),-1)
         box = list()
         for obj in anno_tree.iter(tag="object"):
             box_node = obj.find("bndbox")
@@ -221,17 +223,20 @@ def test_image():
                     int(box_node.findtext("ymin")),
                     int(box_node.findtext("xmax")),
                     int(box_node.findtext("ymax")),
+                    obj.findtext("name")
                 ]
             )
         for box in box:
-            log.info(box)
             cv.rectangle(img, (box[0], box[1]), (box[2], box[3]), (0,255,0), 4)
-        cv.imshow("img", img)
+            cv.putText(img, box[4], (box[0], box[1]-5), cv.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+        _s = min(1080.0/img.shape[1], 720.0/img.shape[0])
+        resized = cv.resize(img, None, fx=_s, fy=_s, interpolation=cv.INTER_AREA)
+        cv.imshow("resized", resized)
         cv.waitKey()
         cv.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    #enhancement = Enhancement()
-    #enhancement.run()
+    # enhancement = Enhancement()
+    # enhancement.run()
     test_image()
